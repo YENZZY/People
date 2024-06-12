@@ -1,0 +1,164 @@
+<mvc:View xmlns:smartmultiedit="sap.ui.comp.smartmultiedit" xmlns:vbm="sap.ui.vbm" controllerName="people.controller.Main"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.ui.table"
+	xmlns:u="sap.ui.unified"
+	xmlns:c="sap.ui.core"
+    xmlns:l="sap.ui.layout"
+    xmlns:m="sap.m">
+    <m:Page id="page" title="{i18n>title}">
+        <m:content>
+            <m:Panel width="auto">
+                <!-- 조회 조건 -->
+                <m:OverflowToolbar style="Clear">
+                    <m:Title text="조회 조건"/>
+                    <m:ToolbarSpacer/>
+                    <m:Button text="생성" press="onCreate" type="Emphasized"/>
+                    <m:Button text="조회" press="onFind" type="Emphasized"/>
+                </m:OverflowToolbar>
+                
+                <!-- 조회 조건 필터 -->
+                <m:VBox justifyContent="Center" alignItems="Center" width="100%" height="5%"> <!-- VBox를 사용하여 HBox를 중앙에 배치 -->
+                    <m:HBox justifyContent="SpaceBetween" width="80%" alignItems="Center" height="100%"> <!--Hbox 수평 배치 컨테이너 Vbox 수직 배치 컨테이너-->
+                        <m:HBox justifyContent="Center" alignItems="Center" height="100%">   
+                                <m:Label text="성명" width="3em"/>
+                                <m:Input id="Name" placeholder="이름을 입력하세요." value="{empModel>/Name}" width="15em"/>
+                        </m:HBox>
+                        <!-- <m:HBox justifyContent="Center" alignItems="Center" height="100%">
+                                <m:Label text="부서" width="3em"/>
+                                <m:Select id="selectBuname" items="{path: 'buModel>/'}" selectedKey="{empModel>/Buname}" width="17em">
+                                    <c:Item key="{buModel>Bukey}" text="{buModel>Butxt}" />
+                                </m:Select>
+                        </m:HBox> -->
+                          <!-- value help 부서명 -->
+                        <m:HBox justifyContent="Center" alignItems="Center" height="100%">
+                            <m:Label text="부서" width="3em"/>
+                            <m:MultiInput id="selectBuname" showValueHelp="true" valueHelpRequest="onValueHelpRequest" width="17em">
+                                <m:tokens>
+                                    <m:Token key="{buseoData>Bukey}" text="{buseoData>Butxt}" />
+                                </m:tokens>
+                            </m:MultiInput>
+                        </m:HBox>
+                         <!-- value help 부서명 끝-->
+                        <m:HBox justifyContent="Center" alignItems="Center" height="100%">
+                                <m:Label text="입사일" width="4em"/>
+                                <m:DatePicker id="hiredate" displayFormat="yyyy-MM-dd" valueFormat="yyyy-MM-dd" value="{empModel>/Hiredate}" width="15em"/>
+                        </m:HBox>
+                    </m:HBox>
+                </m:VBox>
+            </m:Panel>
+
+            <m:Panel width="auto">
+                <!-- 검색 결과 테이블 -->
+                <Table id="empTable" rows="{empModel>/}"
+                rowActionCount="1" 
+                selectionMode="MultiToggle"
+                
+                
+                > <!--rowActionCount: 각 행에 대해 n가지 액션(편집, 상세 보기)만 수행 selectionMode : 테이블 행의 선택 모드-->
+
+                    <!-- 검색 결과 -->
+                    <extension>
+                        <m:OverflowToolbar style="Clear">
+                            <m:Title text="{= '검색 결과 : ' + ${empModel>/resultCount} + ' 명'}"/> <!--Expression Binding : 조건에 따라 다른 텍스트를 표시하거나, 계산된 값을 표시하는데 사용-->
+                            <m:ToolbarSpacer/>
+                            <m:Button icon="sap-icon://excel-attachment" press="onExport"/>
+                            <m:Button text="삭제" press="onDelete" type="Emphasized"/>
+                            <u:FileUploader id="FileUploaderId" sameFilenameAllowed="true" iconOnly="false" buttonOnly="true" fileType="XLSX,xlsx"
+									icon="sap-icon://upload" iconFirst="true" style="Emphasized" change="onUpload"/>
+                        </m:OverflowToolbar>
+                    </extension>
+                    <rowActionTemplate>
+                    <RowAction>
+                        <RowActionItem type="Navigation" press="onMove">
+                        </RowActionItem>
+                    </RowAction>
+				</rowActionTemplate>
+
+                    <!--직원 정보 내역(행)-->
+                    <columns>
+                        <Column hAlign="Center" 
+                                sortProperty="Name"
+                                showSortMenuEntry="true"> <!--가운데 정렬-->
+                            <m:Label text="성명"/>
+                            <template>
+                                <m:Text text="{path:'empModel>Name'}"/>
+                            </template>
+                        </Column>
+                        <Column hAlign="Center"
+                                sortProperty="BuName"
+                                showSortMenuEntry="true">
+                            <m:Label text="부서명"/>
+                            <template>
+                                <m:Text text="{path:'empModel>Buname'}"/>
+                            </template>
+                        </Column>
+                        <Column hAlign="Center"
+                                sortProperty="Maintel"
+                                showSortMenuEntry="true">
+                            <m:Label text="대표전화"/>
+                            <template>
+                                <m:Text text="{
+                                    parts: [
+                                            {path: 'empModel>Maintel'},
+                                            {path: 'empModel>Mobile'},
+                                            {path: 'empModel>Phone'}],
+                                    formatter: '.formatMaintel'
+                                }"/>
+                            </template>
+                        </Column>
+                        <Column hAlign="Center"
+                                sortProperty="Email"
+                                showSortMenuEntry="true">
+                            <m:Label text="이메일"/>
+                            <template>
+                                <m:Text text="{path:'empModel>Email'}"/>
+                            </template>
+                        </Column>
+                        <Column hAlign="Center"
+                                sortProperty="Hiredate"
+                                showSortMenuEntry="true">
+                            <m:Label text="입사일"/>
+                            <template>
+                                <m:Text text="{path:'empModel>Hiredate'}"/>
+                            </template>
+                        </Column>
+                    </columns>
+                </Table>
+                <m:Table id="exportTable" inset="false" items="{path:'empModel>/'}" visible="false">
+                        <m:columns>
+                            <m:Column >
+                                <m:Text text="성명"/>
+                            </m:Column>
+                            <m:Column >
+                                <m:Text text="부서명"/>
+                            </m:Column>
+                            <m:Column >
+                                <m:Text text="휴대전화"/>
+                            </m:Column>
+                            <m:Column >
+                                <m:Text text="내선전화"/>
+                            </m:Column>
+                            <m:Column >
+                                <m:Text text="이메일"/>
+                            </m:Column>
+                            <m:Column >
+                                <m:Text text="입사일"/>
+                            </m:Column>
+                        </m:columns>
+                        <m:items>
+                            <m:ColumnListItem>
+                                <m:cells>
+                                    <m:Text text="{empModel>Name}" />
+                                    <m:Text text="{empModel>Buname}" />
+                                    <m:Text text="{empModel>Mobile}" />
+                                    <m:Text text="{empModel>Phone}" />
+                                    <m:Text text="{empModel>Email}" />
+                                    <m:Text text="{empModel>Hiredate}" />
+                                </m:cells>
+                            </m:ColumnListItem>
+                        </m:items>
+                    </m:Table>
+            </m:Panel>
+        </m:content>
+    </m:Page>
+</mvc:View>

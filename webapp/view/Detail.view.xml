@@ -1,0 +1,73 @@
+<mvc:View xmlns:smartmultiedit="sap.ui.comp.smartmultiedit" xmlns:vbm="sap.ui.vbm" controllerName="people.controller.Detail"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.ui.table"
+    xmlns:u="sap.ui.unified"
+    xmlns:c="sap.ui.core"
+    xmlns:l="sap.ui.layout"
+    xmlns:m="sap.m"
+>
+    <m:Page id="page" title="{i18n>title}">
+        <m:content>
+            <m:Panel width="auto">
+                <m:OverflowToolbar style="Clear">
+                    <m:Title text="직원 정보"/>
+                    <m:ToolbarSpacer/>
+                    <m:Button text="초기화" press="onClear" type="Emphasized" enabled="{editModel>/editable}"/>
+                    <m:Button text="{editModel>/buttonText}" press="onSave" type="Emphasized"/>
+                    <m:Button text="취소" press="onHome" type="Emphasized"/>
+                </m:OverflowToolbar>
+                <m:VBox justifyContent="Center" alignItems="Center" width="100%">
+                    <!-- 첫번째 줄 -->
+                    <m:HBox width="60%" justifyContent="SpaceBetween" class="sapUiTinyMarginBottom">
+                        <m:HBox width="45%" alignItems="Center">
+                            <m:Label text="성명"  width="4em" />
+                            <m:Input placeholder="이름을 입력하세요." value="{newModel>/Name}" editable="{editModel>/editable}" width="15em"/>
+                        </m:HBox>
+                        <m:HBox width="45%" alignItems="Center">
+                            <m:Label text="부서" width="4em"/>
+                            <m:Select items="{buModel>/}" selectedKey="{newModel>/Bukey}" change="onSelectChange" enabled="{editModel>/editable}" width="17em">
+                                <c:Item key="{buModel>Bukey}" text="{buModel>Butxt}"/>
+                            </m:Select>
+                        </m:HBox>
+                    </m:HBox>
+                    <!-- 두번째 줄 -->
+                    <m:HBox width="60%" justifyContent="SpaceBetween" class="sapUiTinyMarginBottom" >
+                        <m:HBox width="45%" alignItems="Center">
+                            <m:Label text="휴대전화" id="Mobile" width="4em"/>
+                            <m:Input placeholder="ex.010-1234-5678" value="{newModel>/Mobile}" editable="{editModel>/editable}" width="15em"/>
+                        </m:HBox>
+                        <m:HBox width="45%" alignItems="Center">
+                            <m:Label text="입사일" width="4em"/>
+                            <m:DatePicker id="hiredate" displayFormat="yyyy-MM-dd" valueFormat="yyyy-MM-dd" value="{newModel>/Hiredate}" editable="{editModel>/editable}" width="15em"/>
+                        </m:HBox>
+                    </m:HBox>
+                    <!-- 세번째 줄 -->
+                    <m:HBox width="60%" justifyContent="SpaceBetween" class="sapUiTinyMarginBottom">
+                        <m:HBox width="45%" alignItems="Center">
+                            <m:Label text="이메일" width="4em"/>
+                            <m:Input placeholder="ex.aspn123@aspnc.com" value="{newModel>/Email}" enabled="{editModel>/editable}" width="15em"/>
+                        </m:HBox>
+                        <m:HBox width="45%" alignItems="Center">
+                            <m:Label text="내선전화" id="Phone" width="4em"/>
+                            <m:Input placeholder="ex.1234" value="{newModel>/Phone}" editable="{editModel>/editable}" width="15em"/>
+                        </m:HBox>
+                    </m:HBox>
+                     <!-- 네번째 줄 -->
+                    <m:HBox width="60%" justifyContent="SpaceBetween" class="sapUiTinyMarginBottom">
+                        <m:HBox width="45%" alignItems="Center">
+                            <m:Label text="인턴여부" width="4em"/>
+                            <m:CheckBox id="Inyn" selected="{path: 'newModel>/Inyn'}" editable="{editModel>/editable}" width="15em"/>
+                        </m:HBox>
+                        <m:HBox width="45%" alignItems="Center">
+                            <m:Label text="대표전화" labelFor="Maintel" width="4em"/>
+                            <m:RadioButtonGroup id="Maintel" columns="2" selectedIndex="{path: 'newModel>/Maintel'}" editable="{editModel>/editable}" width="15em">
+                                <m:RadioButton text="휴대전화" id="0" width="7em"/>
+                                <m:RadioButton text="내선전화" id="1" width="7em"/>
+                            </m:RadioButtonGroup>
+                        </m:HBox>
+                    </m:HBox>
+                    </m:VBox>
+            </m:Panel>
+        </m:content>
+    </m:Page>
+</mvc:View>
