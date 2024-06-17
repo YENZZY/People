@@ -21,7 +21,7 @@
                     <m:HBox justifyContent="SpaceBetween" width="80%" alignItems="Center" height="100%"> <!--Hbox 수평 배치 컨테이너 Vbox 수직 배치 컨테이너-->
                         <m:HBox justifyContent="Center" alignItems="Center" height="100%">   
                                 <m:Label text="성명" width="3em"/>
-                                <m:Input id="Name" placeholder="이름을 입력하세요." value="{empModel>/Name}" width="15em"/>
+                                <m:Input id="Name" placeholder="이름을 입력하세요." value="{filterModel>/Name}" width="15em"/>
                         </m:HBox>
                         <!-- <m:HBox justifyContent="Center" alignItems="Center" height="100%">
                                 <m:Label text="부서" width="3em"/>
@@ -41,7 +41,7 @@
                          <!-- value help 부서명 끝-->
                         <m:HBox justifyContent="Center" alignItems="Center" height="100%">
                                 <m:Label text="입사일" width="4em"/>
-                                <m:DatePicker id="hiredate" displayFormat="yyyy-MM-dd" valueFormat="yyyy-MM-dd" value="{empModel>/Hiredate}" width="15em"/>
+                                <m:DatePicker id="hiredate" displayFormat="yyyy-MM-dd" valueFormat="yyyy-MM-dd" value="{filterModel>/Hiredate}" width="15em"/>
                         </m:HBox>
                     </m:HBox>
                 </m:VBox>
@@ -154,6 +154,7 @@
                                     <m:Text text="{empModel>Phone}" />
                                     <m:Text text="{empModel>Email}" />
                                     <m:Text text="{empModel>Hiredate}" />
+                                    <m:Text text="{empModel>Inyn}" />
                                 </m:cells>
                             </m:ColumnListItem>
                         </m:items>

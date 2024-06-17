@@ -21,6 +21,18 @@ function (Controller, JSONModel, MessageBox, Filter, FilterOperator, exportLibra
         onInit: function () { 
             this.getRouter().getRoute("Main").attachMatched(this._onRouteMatched, this) // 라우터 설정, Main 페이지 로드 될때 메소드 호출, attachMatched : 라우트가 매칭될 때 실행할 콜백 함수 설정
             // return this : 메서드 체이닝, 여러 메서드를 연속적으로 호출
+            
+            this._initializeFilterModel();
+        },
+
+        // 필터 모델 생성
+        _initializeFilterModel: function() {
+            var oFilterModel = new JSONModel({
+                Name: "",          // 이름 필터 초기값
+                BuNames: [],       // 부서명 필터 배열 초기값
+                Hiredate: null     // 입사일 필터 초기값
+            });
+            this.setModel(oFilterModel, "filterModel");
         },
 
         // 해당 라우트가 매칭되면 _getData 메소드를 호출
@@ -33,6 +45,7 @@ function (Controller, JSONModel, MessageBox, Filter, FilterOperator, exportLibra
         _getData: function () {
             var oMainModel = this.getOwnerComponent().getModel(); // 메인 모델 가져오기
             var oBuModel = this.getOwnerComponent().getModel("buseoData"); // 부서명 가져오기
+            
             // 데이터 읽기 성공 시 JSON 모델로 설정 , JSON 모델 객체를 생성한 후, 이 데이터를 모델에 설정
             this._getODataRead(oMainModel, "/People").done(
                 function(aGetData){
@@ -93,47 +106,49 @@ function (Controller, JSONModel, MessageBox, Filter, FilterOperator, exportLibra
         },
 
         // 데이터 조회 onFind
-        onFind: function () {
-            var aFilters = []; // 필터 배열 생성
-            
-            // 이름 필터 추가
-            var sName = this.getView().getModel("empModel").getProperty("/Name"); // empModel에서 이름 필드에 대한 값 가져오기
-            if (sName) {
-                aFilters.push(new Filter("Name", FilterOperator.Contains, sName));
-            }
-            
-            // 입사일 필터링
-            var sHiredate = this.getView().getModel("empModel").getProperty("/Hiredate");
-            if (sHiredate) {
-                aFilters.push(new Filter("Hiredate", FilterOperator.LE, sHiredate)); // 선택 날짜 이하
-            }
-            
-            // 부서명 필터링
-            var aBuNames = this.byId("selectBuname").getTokens().map(function(oToken) {
-                return oToken.getText().replace(/\s*\([^)]*\)/, '');
-            });
-            
-            if (aBuNames.length === 0) {
-                this._getData(); // 부서명이 없는 경우 전체 데이터 조회
-                return;
-            }
-            // 필터를 설정할 부서명 배열을 생성
-            var aBuFilters = aBuNames.map(function(sBuName) {
-                return new Filter("Buname", FilterOperator.EQ, sBuName);
-            });
-            
-            //// 부서명 필터를 결합하여 OR 조건으로 설정
-            var oCombinedBuFilter = new Filter({
-                filters: aBuFilters,
-                and: false // OR 조건을 사용하여 각 부서명 필터를 결합
-            });
-            
-            // 테이블과 바인딩을 가져와서 필터를 적용
-            var oTable = this.byId("empTable");
-            var oBinding = oTable.getBinding("rows");
-            oBinding.filter(oCombinedBuFilter);
-        },
-            
+onFind: function () {
+    // 필터 배열 생성
+    var aFilters = [];
+
+    // 이름 필터 추가
+    var sName = this.getView().getModel("filterModel").getProperty("/Name");
+    if (sName) {
+        aFilters.push(new Filter("Name", FilterOperator.Contains, sName));
+    }
+    
+    // 부서명 필터 추가
+    var aBuNames = this.getView().getModel("filterModel").getProperty("/BuNames");
+    if (aBuNames && aBuNames.length > 0) {
+        // 중복된 부서명을 포함하여 필터 추가
+        aBuNames.forEach(function(sBuName) {
+            aFilters.push(new Filter("Buname", FilterOperator.EQ, sBuName));
+        });
+    }
+
+    // 입사일 필터 추가
+    var sHiredate = this.getView().getModel("filterModel").getProperty("/Hiredate");
+    if (sHiredate) {
+        aFilters.push(new Filter("Hiredate", FilterOperator.LE, sHiredate));
+    }
+
+    // 모든 필터를 AND 조건으로 결합하여 최종 필터 생성
+    var oFinalFilter = new Filter({
+        filters: aFilters,
+        and: true
+    });
+
+    // 필터 모델에 필터링할 값을 설정
+    var oFilterModel = this.getView().getModel("filterModel");
+    oFilterModel.setProperty("/Name", sName);
+    oFilterModel.setProperty("/Buname", aBuNames);
+    oFilterModel.setProperty("/Hiredate", sHiredate);
+
+    // 테이블과 바인딩을 가져와서 필터를 적용
+    var oTable = this.byId("empTable");
+    var oBinding = oTable.getBinding("rows");
+    oBinding.filter(oFinalFilter);
+},
+
         
             // 부서명 필터링 Select 컨트롤에서 선택된 부서명의 키 가져오기
             // var sBunameKey = this.getView().getModel("empModel").getProperty("/Buname"); // 선택된 부서명의 키를 가져오기 위해 empModel에서 Buname 값 가져옴
@@ -222,8 +237,8 @@ function (Controller, JSONModel, MessageBox, Filter, FilterOperator, exportLibra
         createColumnConfig: function() {
          var aCols = [];
             // 컬럼 라벨과 속성을 정의
-            var labels = ['성명', '부서명', '휴대전화', '내선전화', '이메일', '입사일'];
-            var properties = ['Name', 'Buname', 'Mobile', 'Phone', 'Email', 'Hiredate'];
+            var labels = ['Name', 'Buname', 'Mobile', 'Phone', 'Email', 'Hiredate', 'Inyn'];
+            var properties = ['Name', 'Buname', 'Mobile', 'Phone', 'Email', 'Hiredate', 'Inyn'];
         
             // 라벨과 속성을 매핑하여 컬럼 설정 배열을 생성
             labels.map((label ,index)=>{
@@ -238,7 +253,6 @@ function (Controller, JSONModel, MessageBox, Filter, FilterOperator, exportLibra
 
         // 파일 업로드 //아직 미완성
         onUpload: function (e) {
-            debugger;
             this._import(e.getParameter("files") && e.getParameter("files")[0]);
         },
 
@@ -255,21 +269,35 @@ function (Controller, JSONModel, MessageBox, Filter, FilterOperator, exportLibra
                     workbook.SheetNames.forEach(function (sheetName) {
 
                         excelData = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+                        
                     });
-
+                    
+                    var oExcelModel = that.setModel(new JSONModel(), "excelModel");
+                    var excelOk = that.getModel("excelModel");
+                    console.log(excelOk);
                     // 데이터 모델에 추가
-                    var oMainModel = that.getView().getModel();
-                    if (oMainModel) {
-                        oMainModel.setProperty("/items", excelData);
-                    } else {
-                        console.error("Main model is not defined.");
+                    if (excelOk) {
+                        excelOk.setData(excelData);
+                    };
+
+                    var oMainModel = that.getOwnerComponent().getModel();
+
+                    var oExcelData = excelOk.getData();
+
+                    for(var i=0; i < oExcelData.length; i++){
+                        var oData = oExcelData[i];
+
+                        that._getODataCreate(oMainModel, "/People" , oData).fail(function() {
+                            MessageBox.information("Create Fail");
+                        });
                     }
-                };
-                reader.onerror = function (ex) {
-                    console.log(ex);
-                };
+                    that._updateEmpModelData();
+                }
                 reader.readAsBinaryString(file);
             }
+        },
+        _updateEmpModelData: function(data) {
+            var oMainModel = this.getOwnerComponent().getModel();
         },
         //파일 업로드 끝
         
