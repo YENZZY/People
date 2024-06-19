@@ -38,7 +38,7 @@
                         </m:HBox>
                         <m:HBox width="45%" alignItems="Center">
                             <m:Label text="입사일" width="4em"/>
-                            <m:DatePicker id="hiredate" displayFormat="yyyy-MM-dd" valueFormat="yyyy-MM-dd" value="{newModel>/Hiredate}" editable="{editModel>/editable}" width="15em"/>
+                            <!-- <m:DatePicker id="hiredate" displayFormat="yyyy-MM-dd" valueFormat="yyyy-MM-dd" value="{newModel>/Hiredate}" editable="{editModel>/editable}" width="15em"/> -->
                         </m:HBox>
                     </m:HBox>
                     <!-- 세번째 줄 -->

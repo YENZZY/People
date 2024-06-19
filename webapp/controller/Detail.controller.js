@@ -84,7 +84,7 @@ sap.ui.define([
                 // Uuid가 없는 경우 (새로운 데이터 입력 모드)
                 var oData = {
                     Name: "",
-                    Hiredate: "",
+                    //Hiredate: "",
                     Buname: "",
                     Email: "",
                     Mobile: "",
@@ -102,13 +102,13 @@ sap.ui.define([
                 );
                 this.editFlag = flag;
 
-                // 입사일을 오늘 날짜로 설정
-                var oDatePicker = this.byId("hiredate");
-                var oToday = new Date();
-                var FormatDate = oToday.getFullYear() + '-' +
-                    ('0' + (oToday.getMonth() + 1)).slice(-2) + '-' +
-                    ('0' + oToday.getDate()).slice(-2);
-                oDatePicker.setValue(FormatDate);
+                // // 입사일을 오늘 날짜로 설정
+                // var oDatePicker = this.byId("hiredate");
+                // var oToday = new Date();
+                // var FormatDate = oToday.getFullYear() + '-' +
+                //     ('0' + (oToday.getMonth() + 1)).slice(-2) + '-' +
+                //     ('0' + oToday.getDate()).slice(-2);
+                // oDatePicker.setValue(FormatDate);
                 
                 // 부서 데이터를 가져옴
                 this._getODataRead(oBuModel, "/Buseo").done(function (aGetDataSel) {
@@ -144,11 +144,11 @@ sap.ui.define([
                 var oNewModel = this.getView().getModel("newModel"); // 새로운 모델
                 var oData = oNewModel.getData(); // 새로운 모델의 데이터
 
-                // 필수 입력 사항 체크
-                if (!oData.Name || !oData.Buname || !oData.Hiredate) {
-                    MessageToast.show("성명, 부서명, 입사일은 필수 입력 사항입니다.");
-                    return;
-                }
+                // 필수 입력 사항 체크 || !oData.Hiredate , 입사일
+                // if (!oData.Name || !oData.Buname ) {
+                //     MessageToast.show("성명, 부서명은 필수 입력 사항입니다.");
+                //     return;
+                // }
 
                 // 이메일 형식 체크
                 if (!oData.Email.includes('@')) {
@@ -175,9 +175,11 @@ sap.ui.define([
                     this._getODataCreate(oDataModel, "/People", oData).done(function () {
                         MessageToast.show("데이터가 성공적으로 저장되었습니다.");
                         this.navTo("Main", {});
-                    }.bind(this)).fail(function () {
-                        MessageBox.error("데이터 저장을 실패하였습니다.");
-                    });
+                    }.bind(this)).fail(function (oError) {
+                        console.log(oError);
+                        this._dataError(oError);
+                     
+                    }.bind(this));
                 }
             } else {
                 var oBundle = this.getResourceBundle();
@@ -190,12 +192,32 @@ sap.ui.define([
             }
         },
 
+        _dataError: function(oError){
+            var aMessages = [];
+            if(oError.responseText) {
+                var oResponse = JSON.parse(oError.responseText);
+                if (oResponse.error && oResponse.error.innererror && oResponse.error.innererror.errordetails) {
+                    aMessages = oResponse.error.innererror.errordetails.map(function (detail) {
+                        return detail.message;
+                    });
+                } else {
+                    aMessages.push(oResponse.error.message.value);
+                }
+            } else {
+                aMessages.push("알 수 없는 오류가 발생했습니다.");
+            }
+        
+            aMessages.forEach(function (msg) {
+                MessageBox.error(msg);
+            });
+        },
+
         // 초기화 버튼 클릭 시 호출되는 메서드
         onClear: function () {
             var oModel = this.getView().getModel("newModel");
             oModel.setData({
                 Name: "",
-                Hiredate: "",
+                //Hiredate: "",
                 Buname: "",
                 Email: "",
                 Mobile: "",
@@ -204,11 +226,11 @@ sap.ui.define([
                 Maintel: 0 // 휴대전화로 초기화
             });
 
-            var oToday = new Date();
-            var FormatDate = oToday.getFullYear() + '-' +
-                ('0' + (oToday.getMonth() + 1)).slice(-2) + '-' +
-                ('0' + oToday.getDate()).slice(-2);
-            this.byId("hiredate").setValue(FormatDate);
+            // var oToday = new Date();
+            // var FormatDate = oToday.getFullYear() + '-' +
+            //     ('0' + (oToday.getMonth() + 1)).slice(-2) + '-' +
+            //     ('0' + oToday.getDate()).slice(-2);
+            // this.byId("hiredate").setValue(FormatDate);
 
             this.getView().getModel().setProperty("/selectedBukey", "All");
             MessageToast.show("데이터가 초기화되었습니다.");
