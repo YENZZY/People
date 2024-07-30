@@ -251,7 +251,7 @@ onFind: function () {
             return aCols; // 컬럼 설정 배열 반환
         },
 
-        // 파일 업로드 
+        // 파일 업로드 //미완성
         onUpload: function (e) {
             this._import(e.getParameter("files") && e.getParameter("files")[0]);
         },
